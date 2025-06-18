@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro LRD con Riesgo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    label { font-weight: bold; display: block; margin-top: 0.5rem; }
+    select, textarea, input { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
+    #tratamiento-sugerido { background: #f0f8ff; padding: 1rem; margin-top: 1rem; border-left: 4px solid #27ae60; }
+    table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    th { background-color: #f5f5f5; }
+    .acciones { margin-top: 1rem; }
+    button { padding: 0.5rem 1rem; margin-right: 1rem; }
+        footer {
+      background-color: #ecf0f1;
+      text-align: center;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Registro de Heridas Quirúrgicas, Quemaduras y Lesiones Relacionadas a la Dependencia</h1>
+    <p style="font-size: 1.2rem; margin-bottom: 2rem;">Complejo Hospitalario Dr. Rene Favaloro - Santa Rosa, La Pampa</p>
+    <button onclick="entrarAplicacion()" style="padding: 1rem 2rem; font-size: 1.1rem; background-color: #27ae60; border: none; border-radius: 5px; cursor: pointer; color: white;">
+
+    <nav>
+         <a href="index.html">Inicio</a> 
+        <a href="Pantalla 1.html">Registro de Heridas Quirurgicas y LRD</a>
+        <a href="Pantalla 2.html">Escala Braden / Braden Q</a>
+        <a href="neo2.html">Escala e-NSRAS</a> 
+        <a href="quemado.html">Valoración Paciente Quemado Adulto/Pediatrico</a> 
+    </nav>
+    </button>
+<h1>Escala e-NSRAS</h1>
+<p>Ingrese los datos del paciente y seleccione una opción para cada ítem:</p>
+
+<form id="formulario">
+  <div class="section">
+    <label>Nombre del paciente</label>
+    <input type="text" id="nombrePaciente" required placeholder="Ej: Juan Pérez">
+
+    <label>DNI</label>
+    <input type="text" id="dniPaciente" required placeholder="Ej: 12345678">
+
+    <label>Fecha de evaluación</label>
+    <input type="date" id="fechaEvaluacion" required>
+
+    <label>1. Condición física general</label>
+    <select name="condicion">
+      <option value="0">Seleccione</option>
+      <option value="1">≤ 28 semanas</option>
+      <option value="2">> 28 y ≤ 33 semanas</option>
+      <option value="3">> 33 y ≤ 38 semanas</option>
+      <option value="4">> 38 hasta postérmino</option>
+    </select>
+
+    <label>2. Estado mental</label>
+    <select name="mental">
+      <option value="0">Seleccione</option>
+      <option value="1">No responde</option>
+      <option value="2">Solo responde al dolor</option>
+      <option value="3">Letárgico</option>
+      <option value="4">Alerta</option>
+    </select>
+
+    <label>3. Movilidad</label>
+    <select name="movilidad">
+      <option value="0">Seleccione</option>
+      <option value="1">Completamente inmóvil</option>
+      <option value="2">Muy limitada</option>
+      <option value="3">Ligeramente limitada</option>
+      <option value="4">Sin limitaciones</option>
+    </select>
+
+    <label>4. Actividad</label>
+    <select name="actividad">
+      <option value="0">Seleccione</option>
+      <option value="1">Completamente encamado/a</option>
+      <option value="2">Encamado/a (UCI)</option>
+      <option value="3">Incubadora o intermedios</option>
+      <option value="4">En cuna (activo)</option>
+    </select>
+
+    <label>5. Nutrición</label>
+    <select name="nutricion">
+      <option value="0">Seleccione</option>
+      <option value="1">Muy deficiente</option>
+      <option value="2">Inadecuada</option>
+      <option value="3">Adecuada</option>
+      <option value="4">Excelente</option>
+    </select>
+
+    <label>6. Humedad</label>
+    <select name="humedad">
+      <option value="0">Seleccione</option>
+      <option value="1">Constantemente húmeda</option>
+      <option value="2">Frecuente</option>
+      <option value="3">Ocasional</option>
+      <option value="4">Rara vez húmeda</option>
+    </select>
+  </div>
+
+  <button type="button" onclick="calcular()">Calcular Puntaje</button>
+  <button type="button" onclick="exportarPDF()">Exportar PDF</button>
+  <button type="button" onclick="exportarExcel()">Exportar Excel</button>
+  <button type="button" onclick="borrarHistorial()">Borrar Historial</button>
+</form>
+
+<div id="resultado"></div>
+
+<div id="recomendaciones" class="section" style="display: none;">
+  <h3>Recomendaciones de atención</h3>
+  <div id="textoRecomendaciones"></div>
+</div>
+
+<div id="historial">
+  <h3>Historial de pacientes</h3>
+  <table id="tablaHistorial">
+    <thead>
+      <tr><th>Nombre</th><th>DNI</th><th>Fecha</th><th>Puntaje</th><th>Nivel</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<footer>
+© 2025 - App Local de Registro de Heridas Quirúrgicas, Quemaduras y Lesiones Relacionadas a la Dependencia| Desarrollo en Localhost | Área de Calidad y Seguridad del Paciente
+| Complejo Hospitalario Dr Rene Favaloro Dr Lucio Molas | Santa Rosa La Pampa Argentina
+</footer>
+
+<script>
+function calcular() {
+  const form = document.forms['formulario'];
+  const nombre = document.getElementById('nombrePaciente').value.trim();
+  const dni = document.getElementById('dniPaciente').value.trim();
+  const fecha = document.getElementById('fechaEvaluacion').value;
+
+  if (!nombre || !dni || !fecha) {
+    alert("Por favor complete todos los datos personales.");
+    return;
+  }
+
+  let puntaje = 0;
+  for (let i = 0; i < 6; i++) {
+    const valor = parseInt(form.elements[i + 3].value);
+    if (!valor) {
+      alert("Por favor complete todos los campos de la escala.");
+      return;
+    }
+    puntaje += valor;
+  }
+
+  let nivel = "";
+  if (puntaje < 13) nivel = "ALTO riesgo de UPP";
+  else if (puntaje <= 17) nivel = "MODERADO riesgo de UPP";
+  else nivel = "BAJO riesgo de UPP";
+
+  document.getElementById("resultado").innerHTML =
+  `<strong>Puntaje total:</strong> ${puntaje}<br><strong>Nivel de riesgo:</strong> ${nivel}`;
+
+mostrarRecomendaciones(nivel); // <-- ESTA LÍNEA NUEVA
+
+  const registro = { nombre, dni, fecha, puntaje, nivel };
+  guardarHistorial(registro);
+  mostrarHistorial();
+
+  document.getElementById("resultado").innerHTML =
+    `<strong>Puntaje total:</strong> ${puntaje}<br><strong>Nivel de riesgo:</strong> ${nivel}`;
+}
+
+function guardarHistorial(registro) {
+  let historial = JSON.parse(localStorage.getItem('historialUPP')) || [];
+  historial.push(registro);
+  localStorage.setItem('historialUPP', JSON.stringify(historial));
+}
+
+function mostrarHistorial() {
+  const tbody = document.querySelector("#tablaHistorial tbody");
+  tbody.innerHTML = "";
+  const historial = JSON.parse(localStorage.getItem('historialUPP')) || [];
+
+  historial.forEach(reg => {
+    const fila = `<tr><td>${reg.nombre}</td><td>${reg.dni}</td><td>${reg.fecha}</td><td>${reg.puntaje}</td><td>${reg.nivel}</td></tr>`;
+    tbody.innerHTML += fila;
+  });
+}
+
+function exportarPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text("Historial de Evaluaciones - Escala e-NSRAS", 10, 10);
+  const historial = JSON.parse(localStorage.getItem('historialUPP')) || [];
+  const filas = historial.map(r => [r.nombre, r.dni, r.fecha, r.puntaje, r.nivel]);
+
+  doc.autoTable({
+    head: [['Nombre', 'DNI', 'Fecha', 'Puntaje', 'Nivel']],
+    body: filas,
+    startY: 20
+  });
+
+  doc.save("Historial_e-NSRAS.pdf");
+}
+
+function exportarExcel() {
+  const historial = JSON.parse(localStorage.getItem('historialUPP')) || [];
+  const ws = XLSX.utils.json_to_sheet(historial);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Historial");
+  XLSX.writeFile(wb, "Historial_e-NSRAS.xlsx");
+}
+
+function borrarHistorial() {
+  if (confirm("¿Estás seguro de borrar todo el historial?")) {
+    localStorage.removeItem('historialUPP');
+    mostrarHistorial();
+    document.getElementById("resultado").innerHTML = "";
+  }
+}
+
+window.onload = mostrarHistorial;
+
+function mostrarRecomendaciones(nivel) {
+  const contenedor = document.getElementById("recomendaciones");
+  const texto = document.getElementById("textoRecomendaciones");
+  contenedor.style.display = "block";
+
+  let contenido = "";
+
+  if (nivel.includes("ALTO")) {
+    contenido = `
+      <ul>
+        <li>Reposicionar cada 2 horas. Con SEMP, hasta cada 4 horas si es clínicamente posible.</li>
+        <li>Usar superficies especiales dinámicas para manejo de presión.</li>
+        <li>Evaluar y proteger zonas de presión (occipucio, orejas, talones).</li>
+        <li>Evitar cizallamiento y presión por dispositivos médicos (VMNI, cánulas, etc.).</li>
+        <li>Supervisar hidratación y nutrición enteral/parenteral si es necesario.</li>
+        <li>Inspección de piel en cada cambio de posición.</li>
+        <li>Apoyo emocional a la familia y cuidado centrado en el desarrollo.</li>
+      </ul>
+    `;
+  } else if (nivel.includes("MODERADO")) {
+    contenido = `
+      <ul>
+        <li>Reposicionar cada 3-4 horas.</li>
+        <li>Evaluar necesidad de superficies especiales según estado clínico.</li>
+        <li>Inspección diaria de piel y monitoreo de presión por dispositivos.</li>
+        <li>Garantizar hidratación y alimentación adecuada.</li>
+        <li>Educar al personal y familia sobre signos de alarma.</li>
+      </ul>
+    `;
+  } else if (nivel.includes("BAJO")) {
+    contenido = `
+      <ul>
+        <li>Reposicionar cada 4 horas según tolerancia.</li>
+        <li>Vigilancia pasiva e inspección de piel cada 72 horas o si hay cambios.</li>
+        <li>Higiene, hidratación y confort adecuados.</li>
+        <li>Evaluar periódicamente si el riesgo ha cambiado.</li>
+        <li>Continuar educación del personal en prevención básica.</li>
+      </ul>
+    `;
+  }
+
+  texto.innerHTML = contenido;
+}
+
+</script>
+
+</body>
+</html>

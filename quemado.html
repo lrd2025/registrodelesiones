@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación de Quemaduras</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        h1 {
+            color: #d9534f;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input, select, button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #d9534f;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #c9302c;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .info-table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .info-table th, .info-table td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        .info-table th {
+            background-color: #f5f5f5;
+        }
+        .actions {
+            margin-top: 20px;
+        }
+        .actions button {
+            width: auto;
+            margin-right: 10px;
+        }
+            footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid #ddd;
+      font-size: 0.9rem;
+      color: #666;
+      text-align: center;
+    }
+    </style>
+</head>
+<body>
+</head>
+<body>
+  <main>
+    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Registro de Heridas Quirúrgicas, Quemaduras y Lesiones Relacionadas a la Dependencia</h1>
+    <p style="font-size: 1.2rem; margin-bottom: 2rem;">Complejo Hospitalario Dr. Rene Favaloro - Santa Rosa, La Pampa</p>
+    <button onclick="entrarAplicacion()" style="padding: 1rem 2rem; font-size: 1.1rem; background-color: #27ae60; border: none; border-radius: 5px; cursor: pointer; color: white;">
+
+    <nav>
+         <a href="index.html">Inicio</a> 
+        <a href="Pantalla 1.html">Registro de Heridas Quirurgicas y LRD</a>
+        <a href="Pantalla 2.html">Escala Braden / Braden Q</a>
+        <a href="neo2.html">Escala e-NSRAS</a>
+    </nav>
+    </button>
+    <div class="container">
+        <h1>Evaluación de Gravedad de Quemaduras</h1>
+        <h2>Tabla de referencia</h2>
+        <table class="info-table">
+            <thead>
+                <tr>
+                    <th>Tipo de Quemadura</th>
+                    <th>Porcentaje Leve</th>
+                    <th>Porcentaje Moderada</th>
+                    <th>Porcentaje Grave</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Tipo A (Superficial)</td>
+                    <td>Hasta 15%</td>
+                    <td>16% - 35%</td>
+                    <td>36% o más</td>
+                </tr>
+                <tr>
+                    <td>Tipo AB (Intermedia)</td>
+                    <td>Hasta 5%</td>
+                    <td>6% - 45%</td>
+                    <td>46% o más</td>
+                </tr>
+                <tr>
+                    <td>Tipo B (Profunda)</td>
+                    <td>Hasta 1%</td>
+                    <td>2% - 30%</td>
+                    <td>31% o más</td>
+                </tr>
+                <tr>
+                    <td>Tipo C (Subcutánea)</td>
+                    <td>-</td>
+                    <td>Hasta 1%</td>
+                    <td>2% o más</td>
+                </tr>
+            </tbody>
+        </table>
+ <h2>Datos del Paciente</h2>
+ <p>Ingrese los datos del paciente para determinar la gravedad de las quemaduras y obtener recomendaciones de atención.</p>
+        <form id="burnEvaluationForm">
+            <div class="form-group">
+                <label for="age">Edad del paciente:</label>
+                <input type="number" id="age" name="age" required>
+            </div>
+
+            <div class="form-group">
+                <label for="burnType">Tipo de quemadura:</label>
+                <select id="burnType" name="burnType" required>
+                    <option value="A">Tipo A - Superficial</option>
+                    <option value="AB">Tipo AB - Intermedia</option>
+                    <option value="B">Tipo B - Profunda</option>
+                    <option value="C">Tipo C - Subcutánea</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="burnPercentage">Porcentaje de superficie corporal quemada (%):</label>
+                <input type="number" id="burnPercentage" name="burnPercentage" required>
+            </div>
+
+            <div class="form-group">
+                <label for="comorbidities">Comorbilidades previas:</label>
+                <select id="comorbidities" name="comorbidities" required>
+                    <option value="none">Ninguna</option>
+                    <option value="mild">Leves</option>
+                    <option value="severe">Graves</option>
+                </select>
+            </div>
+
+            <button type="button" onclick="evaluateBurnSeverity()">Evaluar Gravedad</button>
+        </form>
+
+        <div id="result" class="result" style="display:none;"></div>
+        <div id="recommendations" class="result" style="display:none;"></div>
+
+        <div class="actions">
+            <button type="button" onclick="exportToPDF()">Exportar a PDF</button>
+            <button type="button" onclick="exportToExcel()">Exportar a Excel</button>
+            <button type="button" onclick="clearForm()">Borrar Historial</button>
+        </div>
+    </div>
+  <footer>
+© 2025 - App Local de Registro de Heridas Quirúrgicas, Quemaduras y Lesiones Relacionadas a la Dependencia| Desarrollo en Localhost | Área de Calidad y Seguridad del Paciente
+| Complejo Hospitalario Dr Rene Favaloro Dr Lucio Molas | Santa Rosa La Pampa Argentina
+  </footer>
+    <script>
+        function evaluateBurnSeverity() {
+            const age = parseInt(document.getElementById('age').value);
+            const burnType = document.getElementById('burnType').value;
+            const burnPercentage = parseInt(document.getElementById('burnPercentage').value);
+            const comorbidities = document.getElementById('comorbidities').value;
+
+            let severity = "";
+            let recommendations = "";
+
+            // Clasificación según tipo y porcentaje de quemadura
+            if (burnType === "A") {
+                if (burnPercentage <= 15) {
+                    severity = "Leve";
+                    recommendations = "Aplicar cuidados básicos de limpieza y analgésicos según sea necesario. Mantener la zona hidratada.";
+                } else if (burnPercentage <= 35) {
+                    severity = "Moderada";
+                    recommendations = "Monitorizar al paciente y considerar consulta médica si no hay mejoría. Mantener hidratación adecuada.";
+                } else {
+                    severity = "Grave";
+                    recommendations = "Requiere evaluación médica inmediata. Supervisar signos de infección y considerar hospitalización si es necesario.";
+                }
+            } else if (burnType === "AB") {
+                if (burnPercentage <= 5) {
+                    severity = "Leve";
+                    recommendations = "Supervisar la evolución de la quemadura. Considerar consulta médica si no mejora en 48 horas.";
+                } else if (burnPercentage <= 45) {
+                    severity = "Moderada";
+                    recommendations = "Se recomienda atención en un centro especializado. Evaluar necesidad de injertos.";
+                } else {
+                    severity = "Grave";
+                    recommendations = "Hospitalización inmediata. Monitoreo intensivo y preparación para cirugía reconstructiva si es necesario.";
+                }
+            } else if (burnType === "B") {
+                if (burnPercentage <= 1) {
+                    severity = "Leve";
+                    recommendations = "Consultar a un especialista para evaluar la necesidad de injertos u otros tratamientos específicos.";
+                } else if (burnPercentage <= 30) {
+                    severity = "Moderada";
+                    recommendations = "Evaluación urgente por un especialista. Planificar tratamiento quirúrgico.";
+                } else {
+                    severity = "Grave";
+                    recommendations = "Hospitalización en unidad especializada en quemaduras. Manejo quirúrgico extenso y soporte intensivo.";
+                }
+            } else if (burnType === "C") {
+                if (burnPercentage <= 1) {
+                    severity = "Moderada";
+                    recommendations = "Requiere atención en un centro especializado. Monitorear las estructuras subyacentes afectadas.";
+                } else {
+                    severity = "Grave";
+                    recommendations = "Hospitalización inmediata en una unidad especializada. Posible necesidad de amputaciones o injertos extensos.";
+                }
+            }
+
+            // Ajuste de gravedad según comorbilidades
+            if (comorbidities === "severe" && severity !== "Grave") {
+                severity = "Grave";
+                recommendations += " Debido a las comorbilidades graves, es necesario aumentar la atención médica.";
+            }
+
+            const resultDiv = document.getElementById('result');
+            const recommendationsDiv = document.getElementById('recommendations');
+
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `<strong>Resultado:</strong> La quemadura del paciente se clasifica como <strong>${severity}</strong>.`;
+
+            recommendationsDiv.style.display = 'block';
+            recommendationsDiv.innerHTML = `<strong>Recomendaciones:</strong> ${recommendations}`;
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const resultText = document.getElementById('result').innerText;
+            const recommendationsText = document.getElementById('recommendations').innerText;
+
+            doc.text("Resultado de Evaluación de Quemaduras", 10, 10);
+            doc.text(resultText, 10, 20);
+            doc.text(recommendationsText, 10, 40);
+
+            doc.save("evaluacion_quemaduras.pdf");
+        }
+
+        function exportToExcel() {
+            const resultText = document.getElementById('result').innerText;
+            const recommendationsText = document.getElementById('recommendations').innerText;
+
+            const worksheet = XLSX.utils.json_to_sheet([
+                { Campo: "Resultado", Valor: resultText },
+                { Campo: "Recomendaciones", Valor: recommendationsText }
+            ]);
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Evaluación");
+
+            XLSX.writeFile(workbook, "evaluacion_quemaduras.xlsx");
+        }
+
+        function clearForm() {
+            document.getElementById('burnEvaluationForm').reset();
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('recommendations').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

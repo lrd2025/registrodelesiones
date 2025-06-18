@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro LRD - Dashboard</title>
+  <style>
+    @media (max-width: 768px) {
+  main {
+    flex-direction: column;
+  }
+
+  .panel {
+    padding: 1rem 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  header, footer {
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  input, select, textarea, button {
+    font-size: 1rem;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+body {
+  background-color: #f5f6fa;
+}
+
+.panel {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    main {
+      display: flex;
+      flex: 1;
+    }
+
+    .panel {
+      flex: 1;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .panel h2 {
+      margin-bottom: 1rem;
+      color: #34495e;
+    }
+
+    label {
+      display: block;
+      margin: 0.5rem 0 0.2rem;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #27ae60;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    footer {
+      background-color: #ecf0f1;
+      text-align: center;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    #resultado-filtro ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    #resultado-filtro li {
+      padding: 0.3rem 0;
+    }
+
+    #resultado-filtro a {
+      color: #2980b9;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #resultado-filtro a:hover {
+      text-decoration: underline;
+    }
+
+    #detalle-registro {
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      margin-top: 1rem;
+      display: none;
+    }
+     button { padding: 0.5rem 1rem; margin-right: 1rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Registro de Heridas Quirúrgicas, Quemaduras y Lesiones Relacionadas a la Dependencia</h1>
+  </header>
+      <nav>
+         <a href="index.html">Inicio</a> 
+        <a href="Pantalla 1.html">Registro de Heridas Quirurgicas y LRD</a>
+        <a href="Pantalla 2.html">Escala Braden / Braden Q</a>
+        <a href="neo2.html">Escala e-NSRAS</a> 
+        <a href="quemado.html">Valoración Paciente Quemado Adulto/Pediatrico</a> 
+    </nav>
+    </button>
+
+  <main>
+    <section class="panel" id="panel1">
+      <h2>1. Carga de Datos</h2>
+      <form id="form-carga">
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" required>
+
+        <label for="hora">Hora:</label>
+        <input type="text" id="hora" name="hora" required />
+
+        <label for="nombre">Nombre del paciente:</label>
+        <input type="text" id="nombre" name="nombre" required />
+
+        <label for="tipo-usuario">Tipo de usuario:</label>
+        <select id="tipo-usuario" name="tipo-usuario">
+          <option value="internacion">Internación</option>
+          <option value="externo">Consultorio Externo</option>
+          <option value="vigilancia">Vigilancia de Internación</option>
+        </select>
+
+        <label for="escala">Escala de valoración:</label>
+        <select id="escala" name="escala">
+          <option value="braden">Braden</option>
+          <option value="braden-q">Braden Q</option>
+          <option value="e-nsras">e-NSRAS</option>
+          <option value="quemado">Paciente Quemado Adulto</option>
+          <option value="quemadoq">Paciente Quemado Pediatrico/Neonatal</option>
+        </select>
+
+        <label for="localizacion">Localización de la herida:</label>
+        <input type="text" id="localizacion" name="localizacion" />
+
+        <label for="estadio">Estadio de la LRD:</label>
+        <select id="estadio" name="estadio">
+          
+          <option value="I">Estadio I</option>
+          <option value="II">Estadio II</option>
+          <option value="III">Estadio III</option>
+          <option value="IV">Estadio IV</option>
+        </select>
+
+        <label for="tratamiento">Tratamiento realizado:</label>
+        <textarea id="tratamiento" name="tratamiento"></textarea>
+
+        <label for="materiales">Materiales Utilizados</label>
+        <input type="text" id="materiales" name="materiales" placeholder="Nombre/dosis/Presentación, ej: AMPICILINA 1GR frasco ampolla"/>
+
+        <label for="foto">Foto (solo referencia local):</label>
+        <input type="file" id="foto" name="foto" accept="image/*" />
+
+        <button type="submit">Guardar Registro</button>
+      </form>
+    </section>
+
+    <section class="panel" id="panel2">
+      <h2>2. Filtros y Búsqueda</h2>
+      <form id="form-filtro">
+        <label for="filtro-fecha">Buscar por fecha:</label>
+        <input type="text" id="filtro-fecha" placeholder="Ej. 15/01/2025" />
+
+        <label for="filtro-nombre">Buscar por nombre:</label>
+        <input type="text" id="filtro-nombre" placeholder="Ej. Juan Pérez" />
+
+        <label for="filtro-usuario">Filtrar por tipo de usuario:</label>
+        <select id="filtro-usuario">
+          <option value="">Todos</option>
+          <option value="internacion">Internación</option>
+          <option value="externo">Consultorio Externo</option>
+          <option value="vigilancia">Vigilancia</option>
+        </select>
+
+        <label for="filtro-escala">Filtrar por escala:</label>
+        <select id="filtro-escala">
+          <option value="">Todas</option>
+          <option value="braden">Braden</option>
+          <option value="braden-q">Braden Q</option>
+          <option value="e-nsras">e-NSRAS</option>
+          <option value="quemado">Paciente Quemado Adulto</option>
+          <option value="quemadoq">Paciente Quemado Pediatrico/Neonatal</option>
+        </select>
+
+        <button type="button" onclick="filtrarDatos()">Aplicar filtros</button>
+      </form>
+
+      <div id="resultado-filtro" style="margin-top: 1rem;"></div>
+
+      <div id="detalle-registro">
+        <h3>Detalle del Registro</h3>
+        <p id="detalle-contenido"></p>
+        <button onclick="cerrarDetalle()">Volver</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panel3">
+      <h2>3. Análisis y Resultados</h2>
+      <div id="analisis-resultados"></div>
+    </section>
+
+    <section class="panel" id="panel4">
+      <h2>4. Exportación</h2>
+      <button onclick="exportarCSV()">Exportar a CSV</button>
+    </section>
+  </main>
+
+  <footer>
+    © 2025 - App Local de Registro de Heridas Quirúrgicas, Quemaduras y Lesiones Relacionadas a la Dependencia| Desarrollo en Localhost | Área de Calidad y Seguridad del Paciente
+    | Complejo Hospitalario Dr René Favaloro - Dr Lucio Molas | Santa Rosa, La Pampa, Argentina
+  </footer>
+
+  <script>
+    const registros = JSON.parse(localStorage.getItem('registrosLRD')) || [];
+
+document.getElementById('form-carga').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const archivo = document.getElementById('foto').files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(event) {
+    const imagenBase64 = event.target.result;
+
+    const registro = {
+      fecha: document.getElementById('fecha').value,
+      nombre: document.getElementById('nombre').value,
+      tipoUsuario: document.getElementById('tipo-usuario').value,
+      escala: document.getElementById('escala').value,
+      localizacion: document.getElementById('localizacion').value,
+      estadio: document.getElementById('estadio').value,
+      tratamiento: document.getElementById('tratamiento').value,
+      materiales: document.getElementById('materiales').value,
+      imagen: imagenBase64 || null
+    };
+
+    registros.push(registro);
+    localStorage.setItem('registrosLRD', JSON.stringify(registros));
+    alert('Registro guardado');
+    document.getElementById('form-carga').reset();
+    document.getElementById('preview-img').style.display = 'none';
+    actualizarAnalisis();
+  };
+
+  if (archivo) {
+    reader.readAsDataURL(archivo);
+  } else {
+    reader.onload({ target: { result: null } }); // sigue sin imagen
+  }
+
+
+      registros.push(registro);
+      localStorage.setItem('registrosLRD', JSON.stringify(registros));
+      alert('Registro guardado');
+      this.reset();
+      actualizarAnalisis();
+    });
+
+    function filtrarDatos() {
+      const nombre = document.getElementById('filtro-nombre').value.toLowerCase();
+      const tipo = document.getElementById('filtro-usuario').value;
+      const escala = document.getElementById('filtro-escala').value;
+
+      const resultados = registros.filter(reg => {
+        return (
+          (!nombre || reg.nombre.toLowerCase().includes(nombre)) &&
+          (!tipo || reg.tipoUsuario === tipo) &&
+          (!escala || reg.escala === escala)
+        );
+      });
+
+      const contenedor = document.getElementById('resultado-filtro');
+      if (resultados.length) {
+        contenedor.innerHTML = '<ul>' +
+          resultados.map((r, index) =>
+            `<li><a href="#" onclick="mostrarDetalle(${index})">${r.nombre}</a> - ${r.tipoUsuario} - ${r.escala}</li>`
+          ).join('') +
+          '</ul>';
+      } else {
+        contenedor.innerHTML = '<p>No se encontraron resultados.</p>';
+      }
+    }
+
+function mostrarDetalle(indice) {
+  const r = registros[indice];
+  const detalleHTML = `
+    <strong>Nombre:</strong> ${r.nombre}<br>
+    <strong>Fecha:</strong> ${r.fecha}<br>
+    <strong>Tipo de usuario:</strong> ${r.tipoUsuario}<br>
+    <strong>Escala:</strong> ${r.escala}<br>
+    <strong>Localización:</strong> ${r.localizacion}<br>
+    <strong>Estadio:</strong> ${r.estadio}<br>
+    <strong>Tratamiento:</strong> ${r.tratamiento}<br>
+    <strong>Materiales:</strong> ${r.materiales}<br>
+    ${r.imagen ? `<br><strong>Imagen:</strong><br><img src="${r.imagen}" alt="Imagen cargada" style="max-width: 100%; border: 1px solid #ccc; margin-top: 0.5rem;" />` : ''}
+  `;
+  document.getElementById('detalle-contenido').innerHTML = detalleHTML;
+  document.getElementById('detalle-registro').style.display = 'block';
+  document.getElementById('resultado-filtro').style.display = 'none';
+}
+
+    function cerrarDetalle() {
+      document.getElementById('detalle-registro').style.display = 'none';
+      document.getElementById('resultado-filtro').style.display = 'block';
+    }
+
+    function actualizarAnalisis() {
+      const total = registros.length;
+      const porEscala = registros.reduce((acc, r) => {
+        acc[r.escala] = (acc[r.escala] || 0) + 1;
+        return acc;
+      }, {});
+
+      const contenedor = document.getElementById('analisis-resultados');
+      contenedor.innerHTML = `<p>Total de registros: <strong>${total}</strong></p>` +
+        Object.entries(porEscala).map(([k, v]) => `<p>${k.toUpperCase()}: ${v}</p>`).join('');
+    }
+
+    function exportarCSV() {
+      if (!registros.length) return alert('No hay datos para exportar.');
+      const encabezados = Object.keys(registros[0]);
+      const filas = registros.map(obj => encabezados.map(key => JSON.stringify(obj[key] || "")));
+      const csv = [encabezados.join(",")].concat(filas.map(fila => fila.join(","))).join("\n");
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "registros_LRD.csv";
+      link.click();
+    }
+
+    actualizarAnalisis();
+  </script>
+</body>
+</html>

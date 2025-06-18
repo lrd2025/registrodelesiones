@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro LRD con Riesgo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    label { font-weight: bold; display: block; margin-top: 0.5rem; }
+    select, textarea, input { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
+    #tratamiento-sugerido { background: #f0f8ff; padding: 1rem; margin-top: 1rem; border-left: 4px solid #27ae60; }
+    table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    th { background-color: #f5f5f5; }
+    .acciones { margin-top: 1rem; }
+    button { padding: 0.5rem 1rem; margin-right: 1rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Registro de Heridas Quirúrgicas, Quemaduras y Lesiones Relacionadas a la Dependencia</h1>
+    <p style="font-size: 1.2rem; margin-bottom: 2rem;">Complejo Hospitalario Dr. Rene Favaloro - Santa Rosa, La Pampa</p>
+    <button onclick="entrarAplicacion()" style="padding: 1rem 2rem; font-size: 1.1rem; background-color: #27ae60; border: none; border-radius: 5px; cursor: pointer; color: white;">
+
+    <nav>
+         <a href="index.html">Inicio</a> 
+        <a href="Pantalla 1.html">Registro de Heridas Quirurgicas y LRD</a>
+        <a href="Pantalla 2.html">Escala Braden / Braden Q</a>
+        <a href="neo2.html">Escala e-NSRAS</a> 
+        <a href="quemado.html">Valoración Paciente Quemado Adulto/Pediatrico</a> 
+    </nav>
+    </button>
+  
+    <h1>Evaluación de Riesgo LRD</h1>
+
+    <section>
+      <form id="form-carga">
+
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" required>
+
+        <label for="nombre">Nombre del paciente:</label>
+        <input type="text" id="nombre" name="nombre" required />
+
+        <label for="escala">Escala de Valoración:</label>
+        <select id="escala" name="escala" required>
+          <option value="">Seleccionar</option>
+          <option value="braden">Braden (Adultos)</option>
+          <option value="braden-q">Braden Q (Pediátrica)</option>
+        </select>
+
+        <div id="form-riesgo"></div>
+        <button type="submit">Calcular Riesgo y Sugerir Tratamiento</button>
+      </form>
+    </section>
+
+    <section id="tratamiento-sugerido"></section>
+    <section id="tabla-registros"></section>
+
+    <div class="acciones">
+      <button onclick="exportarExcel()">Exportar a Excel</button>
+      <button onclick="exportarPDF()">Exportar a PDF</button>
+      <button onclick="borrarRegistros()">Borrar Registros</button>
+    </div>
+  </main>
+    </div>
+  <footer>
+© 2025 - App Local de Registro de Heridas Quirúrgicas, Quemaduras y Lesiones Relacionadas a la Dependencia| Desarrollo en Localhost | Área de Calidad y Seguridad del Paciente
+| Complejo Hospitalario Dr Rene Favaloro Dr Lucio Molas | Santa Rosa La Pampa Argentina
+  </footer>
+
+  <!-- Librerías necesarias -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    const opciones = [
+      { valor: 1, texto: "1 - Muy Limitado" },
+      { valor: 2, texto: "2 - Limitado" },
+      { valor: 3, texto: "3 - Algo Limitado" },
+      { valor: 4, texto: "4 - Sin Limitación" }
+    ];
+
+    const registros = JSON.parse(localStorage.getItem('registrosLRD')) || [];
+
+    document.getElementById("escala").addEventListener("change", function () {
+      const escala = this.value;
+      const contenedor = document.getElementById("form-riesgo");
+      contenedor.innerHTML = "";
+
+      const generarCampos = (campo, nombre) => `
+        <label>${campo}:</label>
+        <select name="${nombre}" required>
+          ${opciones.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join("")}
+        </select>`;
+
+      const campos = {
+        "braden": ["Percepción sensorial", "Humedad", "Actividad", "Movilidad", "Nutrición", "Fricción/cizalla"],
+        "braden-q": ["Percepción sensorial", "Humedad", "Actividad", "Movilidad", "Nutrición", "Fricción/cizalla", "Perfusión"]
+      };
+
+      if (escala in campos) {
+        contenedor.innerHTML = campos[escala].map(c => generarCampos(c, escala)).join("");
+      } else {
+        contenedor.innerHTML = "<p>Evaluación basada en factores neonatales (detalle no disponible).</p>";
+      }
+    });
+
+    function calcularBraden(inputs) {
+      const puntaje = inputs.reduce((acc, el) => acc + Number(el.value), 0);
+      let riesgo = "Muy alto";
+      if (puntaje >= 13 && puntaje <= 14) riesgo = "Alto";
+      else if (puntaje >= 15 && puntaje <= 18) riesgo = "Moderado";
+      else if (puntaje > 18) riesgo = "Bajo";
+      return { puntaje, riesgo };
+    }
+
+    function calcularBradenQ(inputs) {
+      const puntaje = inputs.reduce((acc, el) => acc + Number(el.value), 0);
+      const riesgo = puntaje <= 16 ? "Riesgo" : "Sin riesgo";
+      return { puntaje, riesgo };
+    }
+
+    function sugerirTratamiento(riesgo, escala) {
+      if (escala === "braden") {
+        switch (riesgo) {
+          case "Muy alto": return "Superficies dinámicas, rotación < 2 hs, protección total de la piel, control intensivo de humedad y nutrición.";
+          case "Alto": return "Superficies dinámicas, rotación cada 2 hs, control de humedad, evaluación nutricional.";
+          case "Moderado": return "Superficies estáticas, rotación cada 3 hs, cuidados básicos e inspección sistemática.";
+          case "Bajo": return "Higiene básica, inspección regular de piel, uso de emolientes, sin medidas adicionales.";
+        }
+      }
+      if (escala === "braden-q") {
+        return riesgo === "Riesgo"
+          ? "Superficies blandas, protección de piel en contacto con dispositivos, rotación cada 2 hs, evaluación nutricional."
+          : "Cuidados pediátricos estándares, inspección diaria de la piel, control de humedad y nutrición según necesidad.";
+      }
+      return "Cuidados neonatales especializados según protocolo institucional.";
+    }
+
+    function mostrarRegistros() {
+      const contenedor = document.getElementById("tabla-registros");
+      if (!registros.length) {
+        contenedor.innerHTML = "<p>No hay registros guardados.</p>";
+        return;
+      }
+
+      contenedor.innerHTML = `
+        <h2>Registros Guardados</h2>
+        <table id="tabla-datos">
+          <thead>
+            <tr>
+              <th>fecha</th>
+              <th>Nombre</th>
+              <th>Escala</th>
+              <th>Puntaje</th>
+              <th>Riesgo</th>
+              <th>Tratamiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${registros.map(r => `
+              <tr>
+                <td>${r.fecha}</td>
+                <td>${r.nombre}</td>
+                <td>${r.escala}</td>
+                <td>${r.puntaje}</td>
+                <td>${r.riesgo}</td>
+                <td>${r.tratamiento}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    document.getElementById("form-carga").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const escala = document.getElementById("escala").value;
+      const nombre = document.getElementById("nombre").value.trim();
+      const inputs = Array.from(document.querySelectorAll(`select[name='${escala}']`));
+
+      if (!inputs.length || !nombre || inputs.some(i => !i.value)) {
+        alert("Debe completar todos los campos.");
+        return;
+      }
+
+      const resultado = escala === "braden" ? calcularBraden(inputs) : calcularBradenQ(inputs);
+      const tratamiento = sugerirTratamiento(resultado.riesgo, escala);
+
+      const registro = { fecha, nombre, escala, puntaje: resultado.puntaje, riesgo: resultado.riesgo, tratamiento };
+      registros.push(registro);
+      localStorage.setItem("registrosLRD", JSON.stringify(registros));
+
+      document.getElementById("tratamiento-sugerido").innerHTML = `
+        <h3>Resultado:</h3>
+        <p><strong>Fecha:</strong> ${fecha}</p>
+        <p><strong>Paciente:</strong> ${nombre}</p>
+        <p><strong>Escala:</strong> ${escala}</p>
+        <p><strong>Puntaje Total:</strong> ${resultado.puntaje}</p>
+        <p><strong>Riesgo:</strong> ${resultado.riesgo}</p>
+        <h4>Tratamiento Sugerido:</h4>
+        <p>${tratamiento}</p>
+      `;
+
+      this.reset();
+      document.getElementById("form-riesgo").innerHTML = "";
+      mostrarRegistros();
+    });
+
+    function borrarRegistros() {
+      if (confirm("¿Desea borrar todos los registros?")) {
+        localStorage.removeItem("registrosLRD");
+        location.reload();
+      }
+    }
+
+    function exportarExcel() {
+      const hoja = XLSX.utils.json_to_sheet(registros);
+      const libro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(libro, hoja, "Registros LRD");
+      XLSX.writeFile(libro, "registros_lrd.xlsx");
+    }
+
+    function exportarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("Registros LRD", 14, 16);
+      doc.autoTable({
+        startY: 20,
+        head: [["fecha","Nombre", "Escala", "Puntaje", "Riesgo", "Tratamiento"]],
+        body: registros.map(r => [r.fecha,r.nombre, r.escala, r.puntaje, r.riesgo, r.tratamiento])
+      });
+      doc.save("registros_lrd.pdf");
+    }
+
+    mostrarRegistros();
+  </script>
+
+</body>
+</html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro LRD con Riesgo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 2rem;
+      background-color: #f9fafb;
+      color: #333;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 1rem;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.4rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    .acciones button {
+      margin-top: 1rem;
+      margin-right: 1rem;
+    }
+    #tratamiento-sugerido {
+      background: #e6f4ea;
+      padding: 1rem;
+      margin-top: 1.5rem;
+      border-left: 5px solid #27ae60;
+      border-radius: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      background: white;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    }
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+    }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid #ddd;
+      font-size: 0.9rem;
+      color: #666;
+      text-align: center;
+    }
+  </style>
+</head>
