@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visualización de Datos LRD</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    h1, h2 {
+      color: #2c3e50;
+    }
+
+    .resumen, .filtros {
+      margin-bottom: 20px;
+      background: #ecf0f1;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    label {
+      display: inline-block;
+      margin: 0.5rem 0 0.2rem;
+      font-weight: bold;
+    }
+
+    input, select {
+      padding: 0.4rem;
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    button {
+      background-color: #27ae60;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+    }
+
+    th, td {
+      border: 1px solid #bbb;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #34495e;
+      color: white;
+    }
+
+    .no-data {
+      color: #888;
+      margin-top: 20px;
+    }
+
+    canvas {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+    <h1>Registro de Heridas Quirúrgicas, Quemaduras y Lesiones Relacionadas a la Dependencia</h1>
+  </header>
+      <nav>
+        <a href="index.html">Inicio</a> 
+        <a href="Pantalla 1.html">Registro de Heridas Quirurgicas y LRD</a>
+        <a href="Pantalla 2.html">Escala Braden / Braden Q</a>
+        <a href="neo2.html">Escala e-NSRAS</a> 
+        <a href="quemado.html">Valoración Paciente Quemado Adulto/Pediatrico</a> 
+    </nav>
+    </button>
+
+  <div class="resumen">
+    <p><strong>Total de pacientes registrados:</strong> <span id="totalPacientes">0</span></p>
+    <p><strong>Usuarios que ingresaron datos:</strong> <span id="usuarios">-</span></p>
+    <p><strong>Período de análisis:</strong> <span id="periodo">-</span></p>
+    <button onclick="exportarCSV()">Exportar a CSV</button>
+  </div>
+
+  <div class="filtros">
+    <h2>Filtros</h2>
+    <label for="filtro-nombre">Nombre:</label>
+    <input type="text" id="filtro-nombre">
+
+    <label for="filtro-fecha">Fecha:</label>
+    <input type="date" id="filtro-fecha">
+
+    <label for="filtro-usuario">Tipo de usuario:</label>
+    <select id="filtro-usuario">
+      <option value="">Todos</option>
+      <option value="internacion">Internación</option>
+      <option value="externo">Consultorio Externo</option>
+      <option value="vigilancia">Vigilancia</option>
+    </select>
+
+    <label for="filtro-escala">Escala:</label>
+    <select id="filtro-escala">
+      <option value="">Todas</option>
+      <option value="braden">Braden</option>
+      <option value="braden-q">Braden Q</option>
+      <option value="e-nsras">e-NSRAS</option>
+      <option value="quemado">Paciente Quemado Adulto</option>
+      <option value="quemadoq">Paciente Quemado Pediatrico/Neonatal</option>
+    </select>
+
+    <button onclick="aplicarFiltros()">Aplicar filtros</button>
+  </div>
+
+  <h2>Cuadro de Doble Entrada</h2>
+  <div id="tablaContainer"></div>
+
+  <canvas id="graficoEscalas" height="120"></canvas>
+
+  <script>
+    const registrosOriginal = JSON.parse(localStorage.getItem('registrosLRD')) || [];
+    let registrosFiltrados = [...registrosOriginal];
+
+function renderTabla(datos) {
+  const contenedor = document.getElementById("tablaContainer");
+  contenedor.innerHTML = "";
+
+  if (datos.length === 0) {
+    contenedor.innerHTML = "<p class='no-data'>No hay registros coincidentes.</p>";
+    return;
+  }
+
+  const tabla = document.createElement("table");
+  const thead = document.createElement("thead");
+  const tbody = document.createElement("tbody");
+
+  thead.innerHTML = `
+    <tr>
+      <th>#</th>
+      <th>Fecha</th>
+      <th>Nombre</th>
+      <th>Tipo Usuario</th>
+      <th>Escala</th>
+      <th>Localización</th>
+      <th>Estadio</th>
+      <th>Tratamiento</th>
+      <th>Materiales</th>
+      <th>Imagen</th>
+    </tr>
+  `;
+
+  datos.forEach((r, i) => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${r.fecha}</td>
+      <td>${r.nombre}</td>
+      <td>${r.tipoUsuario}</td>
+      <td>${r.escala}</td>
+      <td>${r.localizacion}</td>
+      <td>${r.estadio}</td>
+      <td>${r.tratamiento}</td>
+      <td>${r.materiales}</td>
+<td>${r.imagen ? `<a href="${r.imagen}" target="_blank"><img src="${r.imagen}" alt="Imagen" style="max-width: 120px; border-radius: 6px;" /></a>` : '-'}</td>
+
+    `;
+    tbody.appendChild(fila);
+  });
+
+  tabla.appendChild(thead);
+  tabla.appendChild(tbody);
+  contenedor.appendChild(tabla);
+}
+
+    function renderResumen(datos) {
+      document.getElementById("totalPacientes").textContent = datos.length;
+
+      const usuarios = new Set();
+      const fechas = [];
+
+      datos.forEach(r => {
+        if (r.tipoUsuario) usuarios.add(r.tipoUsuario);
+        if (r.fecha) fechas.push(new Date(r.fecha));
+      });
+
+      document.getElementById("usuarios").textContent = [...usuarios].join(", ");
+
+      if (fechas.length > 0) {
+        fechas.sort((a, b) => a - b);
+        const min = fechas[0].toLocaleDateString();
+        const max = fechas[fechas.length - 1].toLocaleDateString();
+        document.getElementById("periodo").textContent = `${min} - ${max}`;
+      } else {
+        document.getElementById("periodo").textContent = "-";
+      }
+    }
+
+    function renderGrafico(datos) {
+      const conteo = {};
+      datos.forEach(r => {
+        conteo[r.escala] = (conteo[r.escala] || 0) + 1;
+      });
+
+      const ctx = document.getElementById("graficoEscalas").getContext("2d");
+      if (window.grafico) window.grafico.destroy();
+
+      window.grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(conteo),
+          datasets: [{
+            label: 'Cantidad por Escala',
+            data: Object.values(conteo),
+            backgroundColor: '#1abc9c'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: true, text: 'Distribución de Escalas' }
+          }
+        }
+      });
+    }
+
+    function aplicarFiltros() {
+      const nombre = document.getElementById("filtro-nombre").value.toLowerCase();
+      const fecha = document.getElementById("filtro-fecha").value;
+      const tipo = document.getElementById("filtro-usuario").value;
+      const escala = document.getElementById("filtro-escala").value;
+
+      registrosFiltrados = registrosOriginal.filter(r => {
+        return (!nombre || r.nombre.toLowerCase().includes(nombre)) &&
+               (!fecha || r.fecha === fecha) &&
+               (!tipo || r.tipoUsuario === tipo) &&
+               (!escala || r.escala === escala);
+      });
+
+      renderTabla(registrosFiltrados);
+      renderResumen(registrosFiltrados);
+      renderGrafico(registrosFiltrados);
+    }
+
+    function exportarCSV() {
+      if (!registrosFiltrados.length) return alert("No hay datos para exportar.");
+
+      const encabezados = Object.keys(registrosFiltrados[0]);
+      const filas = registrosFiltrados.map(obj =>
+        encabezados.map(key => `"${(obj[key] || "").toString().replace(/"/g, '""')}"`)
+      );
+
+      const csv = [encabezados.join(",")].concat(filas.map(fila => fila.join(","))).join("\n");
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "registros_LRD_filtrados.csv";
+      link.click();
+    }
+
+    // Inicial
+    renderTabla(registrosFiltrados);
+    renderResumen(registrosFiltrados);
+    renderGrafico(registrosFiltrados);
+  </script>
+</body>
+</html>
